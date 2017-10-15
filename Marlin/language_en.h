@@ -94,7 +94,10 @@
   #define MSG_HOME_OFFSETS_APPLIED            _UxGT("Offsets applied")
 #endif
 #ifndef MSG_SET_ORIGIN
-  #define MSG_SET_ORIGIN                      _UxGT("Set origin")
+  #define MSG_SET_ORIGIN                      _UxGT("Set XYZ origin")
+#endif
+#ifndef MSG_SET_Z_ZERO
+  #define MSG_SET_Z_ZERO					  _UxGT("Set Z origin")
 #endif
 #ifndef MSG_PREHEAT_1
   #define MSG_PREHEAT_1                       _UxGT("Preheat PLA")
@@ -146,6 +149,9 @@
 #endif
 #ifndef MSG_RETRACT
   #define MSG_RETRACT                         _UxGT("Retract")
+#endif
+#ifndef MSG_MOVE_XY_ZERO
+   #define MSG_MOVE_XY_ZERO				      _UxGT("Move XY to Zero")
 #endif
 #ifndef MSG_MOVE_AXIS
   #define MSG_MOVE_AXIS                       _UxGT("Move axis")
