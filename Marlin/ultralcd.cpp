@@ -2476,8 +2476,19 @@ void kill_screen(const char* lcd_msg) {
       // Set Home Offsets
       //
       //MENU_ITEM(function, MSG_SET_HOME_OFFSETS, lcd_set_home_offsets);
-      MENU_ITEM(gcode, MSG_SET_ORIGIN, PSTR("G92 X0 Y0 Z0"));
     #endif
+
+    //
+    // Assume the Origin(0,0,0) where ever the head is currently located
+    //
+    MENU_ITEM(gcode, MSG_SET_ORIGIN, PSTR("G92 X0 Y0 Z0"));
+
+
+    //
+    // Set Position: Forces an assumed position (X,Y,Z) for the current location
+    //               Useful for CNC re-machining jobs
+    //
+    MENU_ITEM(submenu, MSG_SET_POSITION, lcd_set_position_menu);
 
     //
     // Disable Steppers
@@ -2876,6 +2887,164 @@ void kill_screen(const char* lcd_msg) {
     #define _MOVE_XY_ALLOWED true
   #endif
 
+  //
+  // "Prepare" > "Set XYZ Position" submenu
+  //
+  // Expect user to already have moved the head/tool to the desired location
+  // This function does not produce any motion.
+  // TODO: Should try to use G92.  After some troubles, I ended up forcing
+  void lcd_set_position_menu() {
+    new_position[X_AXIS] = current_position[X_AXIS];
+    new_position[Y_AXIS] = current_position[Y_AXIS];
+    new_position[Z_AXIS] = current_position[Z_AXIS];
+
+    START_MENU();
+    MENU_BACK(MSG_PREPARE);
+
+    MENU_ITEM(submenu, MSG_SET_X, lcd_set_x_position);
+    MENU_ITEM(submenu, MSG_SET_Y, lcd_set_y_position);
+    MENU_ITEM(submenu, MSG_SET_Z, lcd_set_z_position);
+    END_MENU();
+  }
+
+  void lcd_set_x_position() { _lcd_set_position_xyz(PSTR(MSG_SET_X), X_AXIS); }
+  void lcd_set_y_position() { _lcd_set_position_xyz(PSTR(MSG_SET_Y), Y_AXIS); }
+  void lcd_set_z_position() { _lcd_set_position_xyz(PSTR(MSG_SET_Z), Z_AXIS); }
+
+  void _lcd_set_position_xyz(const char* name, AxisEnum axis) {
+    float set_position_scale = 0.1;
+
+    defer_return_to_status = true;  //auto return to status screen
+    lcd_implementation_drawmenu_static(0, PSTR(MSG_SET_Y), true, true);
+
+    if (lcd_clicked) {
+      defer_return_to_status = false;
+      switch(axis) {
+        case X_AXIS:
+          lcd_goto_screen(set_x_position_confirm_menu); break;
+        case Y_AXIS:
+          lcd_goto_screen(set_y_position_confirm_menu); break;
+        case Z_AXIS:
+          lcd_goto_screen(set_z_position_confirm_menu); break;
+        default:
+          break;
+      }
+      return;
+    }
+
+    // Only do something if encoderPosition moved
+    if (encoderPosition)
+    {
+      float min = current_position[axis] - 1000,
+            max = current_position[axis] + 1000;
+
+      #if HAS_SOFTWARE_ENDSTOPS
+      // Limit to software endstops, if enabled
+      if (soft_endstops_enabled) {
+        #if ENABLED(MIN_SOFTWARE_ENDSTOPS)
+        min = soft_endstop_min[axis];
+        #endif
+        #if ENABLED(MAX_SOFTWARE_ENDSTOPS)
+        max = soft_endstop_max[axis];
+        #endif
+      }
+      #endif
+
+      // Get the new position
+      new_position[axis] += float((int32_t)encoderPosition) * set_position_scale;  //TODO: Should make this update like move_menu_scale
+
+      // TODO:  Needs to be looked at.  Does this feature make sense for 3D printers?
+      // Delta limits XY based on the current offset from center
+      // This assumes the center is 0,0
+      #if ENABLED(DELTA)
+      if (axis != Z_AXIS) {
+        max = SQRT(sq((float)(DELTA_PRINTABLE_RADIUS)) - sq(new_position[Y_AXIS - axis]));
+        min = -max;
+      }
+      #endif
+
+      // Limit only when trying to move towards the limit
+      if ((int32_t)encoderPosition < 0) NOLESS(new_position[axis], min);
+      if ((int32_t)encoderPosition > 0) NOMORE(new_position[axis], max);
+
+      encoderPosition = 0;
+      lcdDrawUpdate = LCDVIEW_REDRAW_NOW;
+    }
+    if (lcdDrawUpdate) {
+      lcd_implementation_drawedit(name, set_position_scale >= 0.1 ? ftostr41sign(new_position[axis]) : ftostr43sign(new_position[axis]));
+    }
+  }
+
+  void set_position_confirm_menu(const AxisEnum axis)
+  {
+    START_MENU();
+
+    if (LCD_HEIGHT >= 4) {
+      switch(axis) {
+        case X_AXIS:
+          STATIC_ITEM(MSG_SET_X, true, true); break;
+        case Y_AXIS:
+          STATIC_ITEM(MSG_SET_Y, true, true); break;
+        case Z_AXIS:
+          STATIC_ITEM(MSG_SET_Z, true, true); break;
+        default:
+          break;
+      }
+    }
+
+    switch(axis) {
+      case X_AXIS:
+        //MENU_ITEM(gcode, MSG_OK, F("G92 X%.3f", new_position[axis])); break; //no worky. corrupts mem
+        MENU_ITEM(function, MSG_OK, lcd_set_x_position_confirm); break;
+      case Y_AXIS:
+        MENU_ITEM(function, MSG_OK, lcd_set_y_position_confirm); break;
+      case Z_AXIS:
+        MENU_ITEM(function, MSG_OK, lcd_set_z_position_confirm); break;
+      default:
+        break;
+    }
+    MENU_ITEM(function, MSG_CANCEL, lcd_set_position_cancel);
+
+    END_MENU();
+  }
+
+  void set_x_position_confirm_menu(){ set_position_confirm_menu(X_AXIS); }
+  void set_y_position_confirm_menu(){ set_position_confirm_menu(Y_AXIS); }
+  void set_z_position_confirm_menu(){ set_position_confirm_menu(Z_AXIS); }
+
+  void lcd_set_x_position_confirm(){ lcd_set_position_confirm(X_AXIS); }
+  void lcd_set_y_position_confirm(){ lcd_set_position_confirm(Y_AXIS); }
+  void lcd_set_z_position_confirm(){ lcd_set_position_confirm(Z_AXIS); }
+
+  void lcd_set_position_confirm(AxisEnum axis)
+  {
+
+#if ENABLED(SET_POSITION_G92_IMPL)
+    char cmd[25];
+    //sprintf_P(cmd, PSTR("G92 X%06f"), new_position[axis]); //no worky.  Seems sprintf_P does not support %f
+    //sprintf_P(cmd, PSTR("G92 X%f"), new_position[axis]); //no worky.  Seems sprintf_P does not support %f
+    sprintf_P(cmd, PSTR("G92 X%i"), (int)new_position[axis]); //works but whole num only
+    enqueue_and_echo_command(cmd);
+#else
+    current_position[axis] = new_position[axis];
+    home_offset[axis] = 0;  // blow away any home_offsets since we claim to know better
+    axis_homed[axis] = true;
+    axis_known_position[axis] = true;
+    update_software_endstops(axis);
+#endif
+    lcd_return_to_status();
+    return;
+  }
+
+  void lcd_set_position_cancel()
+  {
+     lcd_goto_previous_menu();
+     return;
+  }
+
+  //
+  // "Prepare" > "Move axis" submenu
+  //
   void lcd_move_menu() {
     START_MENU();
     MENU_BACK(MSG_PREPARE);

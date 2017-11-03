@@ -93,11 +93,14 @@
 #ifndef MSG_HOME_OFFSETS_APPLIED
   #define MSG_HOME_OFFSETS_APPLIED            _UxGT("Offsets applied")
 #endif
+#ifndef MSG_SET_POSITION
+  #define MSG_SET_POSITION                    _UxGT("Set XYZ Position")
+#endif
 #ifndef MSG_SET_ORIGIN
   #define MSG_SET_ORIGIN                      _UxGT("Set XYZ origin")
 #endif
 #ifndef MSG_SET_Z_ZERO
-  #define MSG_SET_Z_ZERO					  _UxGT("Set Z origin")
+  #define MSG_SET_Z_ZERO                      _UxGT("Set Z origin")
 #endif
 #ifndef MSG_PREHEAT_1
   #define MSG_PREHEAT_1                       _UxGT("Preheat PLA")
@@ -151,7 +154,7 @@
   #define MSG_RETRACT                         _UxGT("Retract")
 #endif
 #ifndef MSG_MOVE_XY_ZERO
-   #define MSG_MOVE_XY_ZERO				      _UxGT("Move XY to Zero")
+   #define MSG_MOVE_XY_ZERO                   _UxGT("Move XY to Zero")
 #endif
 #ifndef MSG_MOVE_AXIS
   #define MSG_MOVE_AXIS                       _UxGT("Move axis")
@@ -377,6 +380,15 @@
 #ifndef MSG_MOVE_Z
   #define MSG_MOVE_Z                          _UxGT("Move Z")
 #endif
+#ifndef MSG_SET_X
+  #define MSG_SET_X                          _UxGT("Set X")
+#endif
+#ifndef MSG_SET_Y
+  #define MSG_SET_Y                          _UxGT("Set Y")
+#endif
+#ifndef MSG_SET_Z
+  #define MSG_SET_Z                          _UxGT("Set Z")
+#endif
 #ifndef MSG_MOVE_E
   #define MSG_MOVE_E                          _UxGT("Extruder")
 #endif
@@ -580,6 +592,12 @@
 #endif
 #ifndef MSG_USERWAIT
   #define MSG_USERWAIT                        _UxGT("Click to resume...")
+#endif
+#ifndef MSG_OK
+  #define MSG_OK                              _UxGT("Ok?")
+#endif
+#ifndef MSG_CANCEL
+  #define MSG_CANCEL                          _UxGT("Cancel")
 #endif
 #ifndef MSG_PRINT_PAUSED
   #define MSG_PRINT_PAUSED                    _UxGT("Print paused")

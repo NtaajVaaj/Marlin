@@ -168,6 +168,26 @@
     #define LCD_CLICKED false
   #endif
 
+  // Set Position Prototypes
+  static float new_position[XYZ] = {0.0};
+  void lcd_set_position_menu();
+  void lcd_set_x_position();
+  void lcd_set_y_position();
+  void lcd_set_z_position();
+  void _lcd_set_position_xyz(const char* name, AxisEnum axis);
+  void lcd_set_position_cancel();
+
+  void lcd_set_position_confirm(AxisEnum axis);
+  void lcd_set_x_position_confirm();
+  void lcd_set_y_position_confirm();
+  void lcd_set_z_position_confirm();
+
+  void set_position_confirm_menu(const AxisEnum axis);
+  void set_x_position_confirm_menu();
+  void set_y_position_confirm_menu();
+  void set_z_position_confirm_menu();
+
+
 #else // no LCD
 
   inline void lcd_update() {}
