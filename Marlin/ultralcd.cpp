@@ -2488,7 +2488,9 @@ void kill_screen(const char* lcd_msg) {
     // Set Position: Forces an assumed position (X,Y,Z) for the current location
     //               Useful for CNC re-machining jobs
     //
-    MENU_ITEM(submenu, MSG_SET_POSITION, lcd_set_position_menu);
+    //DV TODO:  NOT READY - Need to get G92 to work.  Current implementation
+    //          does not update current_position correctly... :-(
+    // MENU_ITEM(submenu, MSG_SET_POSITION, lcd_set_position_menu);
 
     //
     // Disable Steppers

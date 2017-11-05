@@ -520,7 +520,7 @@
   #endif
 
   // Show a progress bar on HD44780 LCDs for SD printing
-  #define LCD_PROGRESS_BAR
+  //#define LCD_PROGRESS_BAR
 
   #if ENABLED(LCD_PROGRESS_BAR)
     // Amount of time (ms) to show the bar
@@ -532,7 +532,7 @@
     // Enable this to show messages for MSG_TIME then hide them
     //#define PROGRESS_MSG_ONCE
     // Add a menu item to test the progress bar:
-    #define LCD_PROGRESS_BAR_TEST
+    //#define LCD_PROGRESS_BAR_TEST
   #endif
 
   // This allows hosts to request long names for files and folders with M33
