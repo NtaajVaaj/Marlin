@@ -2505,30 +2505,34 @@ void kill_screen(const char* lcd_msg) {
         MENU_ITEM(function, MSG_FILAMENTCHANGE, lcd_enqueue_filament_change);
     #endif
 
-    #if TEMP_SENSOR_0 != 0
+	#if !(IS_CNC_MILL)
+		#if TEMP_SENSOR_0 != 0
 
-      //
-      // Cooldown
-      //
-      bool has_heat = false;
-      HOTEND_LOOP() if (thermalManager.target_temperature[HOTEND_INDEX]) { has_heat = true; break; }
-      #if HAS_TEMP_BED
-        if (thermalManager.target_temperature_bed) has_heat = true;
-      #endif
-      if (has_heat) MENU_ITEM(function, MSG_COOLDOWN, lcd_cooldown);
+		  //
+		  // Cooldown
+		  //
+		  bool has_heat = false;
+		  HOTEND_LOOP() if (thermalManager.target_temperature[HOTEND_INDEX]) { has_heat = true; break; }
+		  #if HAS_TEMP_BED
+			if (thermalManager.target_temperature_bed) has_heat = true;
+		  #endif
+		  if (has_heat) MENU_ITEM(function, MSG_COOLDOWN, lcd_cooldown);
 
-      //
-      // Preheat for Material 1 and 2
-      //
-      #if TEMP_SENSOR_1 != 0 || TEMP_SENSOR_2 != 0 || TEMP_SENSOR_3 != 0 || TEMP_SENSOR_4 != 0 || TEMP_SENSOR_BED != 0
-        MENU_ITEM(submenu, MSG_PREHEAT_1, lcd_preheat_m1_menu);
-        MENU_ITEM(submenu, MSG_PREHEAT_2, lcd_preheat_m2_menu);
-      #else
-        MENU_ITEM(function, MSG_PREHEAT_1, lcd_preheat_m1_e0_only);
-        MENU_ITEM(function, MSG_PREHEAT_2, lcd_preheat_m2_e0_only);
-      #endif
 
-    #endif // TEMP_SENSOR_0 != 0
+
+		  //
+		  // Preheat for Material 1 and 2
+		  //
+		  #if TEMP_SENSOR_1 != 0 || TEMP_SENSOR_2 != 0 || TEMP_SENSOR_3 != 0 || TEMP_SENSOR_4 != 0 || TEMP_SENSOR_BED != 0
+			MENU_ITEM(submenu, MSG_PREHEAT_1, lcd_preheat_m1_menu);
+			MENU_ITEM(submenu, MSG_PREHEAT_2, lcd_preheat_m2_menu);
+		  #else
+			MENU_ITEM(function, MSG_PREHEAT_1, lcd_preheat_m1_e0_only);
+			MENU_ITEM(function, MSG_PREHEAT_2, lcd_preheat_m2_e0_only);
+		  #endif
+
+		#endif // TEMP_SENSOR_0 != 0
+	#endif // #if !(IS_CNC_MILL)
 
     //
     // BLTouch Self-Test and Reset
@@ -3068,27 +3072,30 @@ void kill_screen(const char* lcd_msg) {
     else
       MENU_ITEM(gcode, MSG_AUTO_HOME, PSTR("G28"));
 
-    #if ENABLED(SWITCHING_EXTRUDER)
-      if (active_extruder)
-        MENU_ITEM(gcode, MSG_SELECT " " MSG_E1, PSTR("T0"));
-      else
-        MENU_ITEM(gcode, MSG_SELECT " " MSG_E2, PSTR("T1"));
-    #endif
 
-    MENU_ITEM(submenu, MSG_MOVE_E, lcd_move_get_e_amount);
-    #if E_MANUAL > 1
-      MENU_ITEM(submenu, MSG_MOVE_E MSG_MOVE_E1, lcd_move_get_e0_amount);
-      MENU_ITEM(submenu, MSG_MOVE_E MSG_MOVE_E2, lcd_move_get_e1_amount);
-      #if E_MANUAL > 2
-        MENU_ITEM(submenu, MSG_MOVE_E MSG_MOVE_E3, lcd_move_get_e2_amount);
-        #if E_MANUAL > 3
-          MENU_ITEM(submenu, MSG_MOVE_E MSG_MOVE_E4, lcd_move_get_e3_amount);
-          #if E_MANUAL > 4
-            MENU_ITEM(submenu, MSG_MOVE_E MSG_MOVE_E5, lcd_move_get_e4_amount);
-          #endif // E_MANUAL > 4
-        #endif // E_MANUAL > 3
-      #endif // E_MANUAL > 2
-    #endif // E_MANUAL > 1
+	#if !(IS_CNC_MILL)
+		#if ENABLED(SWITCHING_EXTRUDER)
+		  if (active_extruder)
+			MENU_ITEM(gcode, MSG_SELECT " " MSG_E1, PSTR("T0"));
+		  else
+			MENU_ITEM(gcode, MSG_SELECT " " MSG_E2, PSTR("T1"));
+		#endif
+
+		MENU_ITEM(submenu, MSG_MOVE_E, lcd_move_get_e_amount);
+		#if E_MANUAL > 1
+		  MENU_ITEM(submenu, MSG_MOVE_E MSG_MOVE_E1, lcd_move_get_e0_amount);
+		  MENU_ITEM(submenu, MSG_MOVE_E MSG_MOVE_E2, lcd_move_get_e1_amount);
+		  #if E_MANUAL > 2
+			MENU_ITEM(submenu, MSG_MOVE_E MSG_MOVE_E3, lcd_move_get_e2_amount);
+			#if E_MANUAL > 3
+			  MENU_ITEM(submenu, MSG_MOVE_E MSG_MOVE_E4, lcd_move_get_e3_amount);
+			  #if E_MANUAL > 4
+				MENU_ITEM(submenu, MSG_MOVE_E MSG_MOVE_E5, lcd_move_get_e4_amount);
+			  #endif // E_MANUAL > 4
+			#endif // E_MANUAL > 3
+		  #endif // E_MANUAL > 2
+		#endif // E_MANUAL > 1
+	#endif //#if !(IS_CNC_MILL)
 
     END_MENU();
   }
@@ -3113,7 +3120,10 @@ void kill_screen(const char* lcd_msg) {
     MENU_BACK(MSG_MAIN);
     MENU_ITEM(submenu, MSG_TEMPERATURE, lcd_control_temperature_menu);
     MENU_ITEM(submenu, MSG_MOTION, lcd_control_motion_menu);
-    MENU_ITEM(submenu, MSG_FILAMENT, lcd_control_filament_menu);
+
+    #if !(IS_CNC_MILL)
+      MENU_ITEM(submenu, MSG_FILAMENT, lcd_control_filament_menu);
+    #endif
 
     #if HAS_LCD_CONTRAST
       MENU_ITEM_EDIT_CALLBACK(int3, MSG_CONTRAST, (int*)&lcd_contrast, LCD_CONTRAST_MIN, LCD_CONTRAST_MAX, lcd_callback_set_contrast, true);
@@ -3237,32 +3247,34 @@ void kill_screen(const char* lcd_msg) {
     //
     MENU_BACK(MSG_CONTROL);
 
-    //
-    // Nozzle:
-    // Nozzle [1-5]:
-    //
-    #if HOTENDS == 1
-      MENU_MULTIPLIER_ITEM_EDIT_CALLBACK(int3, MSG_NOZZLE, &thermalManager.target_temperature[0], 0, HEATER_0_MAXTEMP - 15, watch_temp_callback_E0);
-    #else // HOTENDS > 1
-      MENU_MULTIPLIER_ITEM_EDIT_CALLBACK(int3, MSG_NOZZLE MSG_N1, &thermalManager.target_temperature[0], 0, HEATER_0_MAXTEMP - 15, watch_temp_callback_E0);
-      MENU_MULTIPLIER_ITEM_EDIT_CALLBACK(int3, MSG_NOZZLE MSG_N2, &thermalManager.target_temperature[1], 0, HEATER_1_MAXTEMP - 15, watch_temp_callback_E1);
-      #if HOTENDS > 2
-        MENU_MULTIPLIER_ITEM_EDIT_CALLBACK(int3, MSG_NOZZLE MSG_N3, &thermalManager.target_temperature[2], 0, HEATER_2_MAXTEMP - 15, watch_temp_callback_E2);
-        #if HOTENDS > 3
-          MENU_MULTIPLIER_ITEM_EDIT_CALLBACK(int3, MSG_NOZZLE MSG_N4, &thermalManager.target_temperature[3], 0, HEATER_3_MAXTEMP - 15, watch_temp_callback_E3);
-          #if HOTENDS > 4
-            MENU_MULTIPLIER_ITEM_EDIT_CALLBACK(int3, MSG_NOZZLE MSG_N5, &thermalManager.target_temperature[4], 0, HEATER_4_MAXTEMP - 15, watch_temp_callback_E4);
-          #endif // HOTENDS > 4
-        #endif // HOTENDS > 3
-      #endif // HOTENDS > 2
-    #endif // HOTENDS > 1
+	#if !(IS_CNC_MILL)
+		//
+		// Nozzle:
+		// Nozzle [1-5]:
+		//
+		#if HOTENDS == 1
+		  MENU_MULTIPLIER_ITEM_EDIT_CALLBACK(int3, MSG_NOZZLE, &thermalManager.target_temperature[0], 0, HEATER_0_MAXTEMP - 15, watch_temp_callback_E0);
+		#else // HOTENDS > 1
+		  MENU_MULTIPLIER_ITEM_EDIT_CALLBACK(int3, MSG_NOZZLE MSG_N1, &thermalManager.target_temperature[0], 0, HEATER_0_MAXTEMP - 15, watch_temp_callback_E0);
+		  MENU_MULTIPLIER_ITEM_EDIT_CALLBACK(int3, MSG_NOZZLE MSG_N2, &thermalManager.target_temperature[1], 0, HEATER_1_MAXTEMP - 15, watch_temp_callback_E1);
+		  #if HOTENDS > 2
+			MENU_MULTIPLIER_ITEM_EDIT_CALLBACK(int3, MSG_NOZZLE MSG_N3, &thermalManager.target_temperature[2], 0, HEATER_2_MAXTEMP - 15, watch_temp_callback_E2);
+			#if HOTENDS > 3
+			  MENU_MULTIPLIER_ITEM_EDIT_CALLBACK(int3, MSG_NOZZLE MSG_N4, &thermalManager.target_temperature[3], 0, HEATER_3_MAXTEMP - 15, watch_temp_callback_E3);
+			  #if HOTENDS > 4
+				MENU_MULTIPLIER_ITEM_EDIT_CALLBACK(int3, MSG_NOZZLE MSG_N5, &thermalManager.target_temperature[4], 0, HEATER_4_MAXTEMP - 15, watch_temp_callback_E4);
+			  #endif // HOTENDS > 4
+			#endif // HOTENDS > 3
+		  #endif // HOTENDS > 2
+		#endif // HOTENDS > 1
 
-    //
-    // Bed:
-    //
-    #if HAS_TEMP_BED
-      MENU_MULTIPLIER_ITEM_EDIT_CALLBACK(int3, MSG_BED, &thermalManager.target_temperature_bed, 0, BED_MAXTEMP - 15, watch_temp_callback_bed);
-    #endif
+		//
+		// Bed:
+		//
+		#if HAS_TEMP_BED
+		  MENU_MULTIPLIER_ITEM_EDIT_CALLBACK(int3, MSG_BED, &thermalManager.target_temperature_bed, 0, BED_MAXTEMP - 15, watch_temp_callback_bed);
+		#endif
+	#endif // #if !(IS_CNC_MILL)
 
     //
     // Fan Speed:
@@ -3284,76 +3296,81 @@ void kill_screen(const char* lcd_msg) {
       #endif
     #endif // FAN_COUNT > 0
 
-    //
-    // Autotemp, Min, Max, Fact
-    //
-    #if ENABLED(AUTOTEMP) && (TEMP_SENSOR_0 != 0)
-      MENU_ITEM_EDIT(bool, MSG_AUTOTEMP, &planner.autotemp_enabled);
-      MENU_ITEM_EDIT(float3, MSG_MIN, &planner.autotemp_min, 0, HEATER_0_MAXTEMP - 15);
-      MENU_ITEM_EDIT(float3, MSG_MAX, &planner.autotemp_max, 0, HEATER_0_MAXTEMP - 15);
-      MENU_ITEM_EDIT(float32, MSG_FACTOR, &planner.autotemp_factor, 0.0, 1.0);
-    #endif
+	#if !(IS_CNC_MILL)
 
-    //
-    // PID-P, PID-I, PID-D, PID-C, PID Autotune
-    // PID-P E1, PID-I E1, PID-D E1, PID-C E1, PID Autotune E1
-    // PID-P E2, PID-I E2, PID-D E2, PID-C E2, PID Autotune E2
-    // PID-P E3, PID-I E3, PID-D E3, PID-C E3, PID Autotune E3
-    // PID-P E4, PID-I E4, PID-D E4, PID-C E4, PID Autotune E4
-    // PID-P E5, PID-I E5, PID-D E5, PID-C E5, PID Autotune E5
-    //
-    #if ENABLED(PIDTEMP)
+		//
+		// Autotemp, Min, Max, Fact
+		//
+		#if ENABLED(AUTOTEMP) && (TEMP_SENSOR_0 != 0)
+		  MENU_ITEM_EDIT(bool, MSG_AUTOTEMP, &planner.autotemp_enabled);
+		  MENU_ITEM_EDIT(float3, MSG_MIN, &planner.autotemp_min, 0, HEATER_0_MAXTEMP - 15);
+		  MENU_ITEM_EDIT(float3, MSG_MAX, &planner.autotemp_max, 0, HEATER_0_MAXTEMP - 15);
+		  MENU_ITEM_EDIT(float32, MSG_FACTOR, &planner.autotemp_factor, 0.0, 1.0);
+		#endif
 
-      #define _PID_BASE_MENU_ITEMS(ELABEL, eindex) \
-        raw_Ki = unscalePID_i(PID_PARAM(Ki, eindex)); \
-        raw_Kd = unscalePID_d(PID_PARAM(Kd, eindex)); \
-        MENU_ITEM_EDIT(float52, MSG_PID_P ELABEL, &PID_PARAM(Kp, eindex), 1, 9990); \
-        MENU_ITEM_EDIT_CALLBACK(float52, MSG_PID_I ELABEL, &raw_Ki, 0.01, 9990, copy_and_scalePID_i_E ## eindex); \
-        MENU_ITEM_EDIT_CALLBACK(float52, MSG_PID_D ELABEL, &raw_Kd, 1, 9990, copy_and_scalePID_d_E ## eindex)
+		//
+		// PID-P, PID-I, PID-D, PID-C, PID Autotune
+		// PID-P E1, PID-I E1, PID-D E1, PID-C E1, PID Autotune E1
+		// PID-P E2, PID-I E2, PID-D E2, PID-C E2, PID Autotune E2
+		// PID-P E3, PID-I E3, PID-D E3, PID-C E3, PID Autotune E3
+		// PID-P E4, PID-I E4, PID-D E4, PID-C E4, PID Autotune E4
+		// PID-P E5, PID-I E5, PID-D E5, PID-C E5, PID Autotune E5
+		//
+		#if ENABLED(PIDTEMP)
 
-      #if ENABLED(PID_EXTRUSION_SCALING)
-        #define _PID_MENU_ITEMS(ELABEL, eindex) \
-          _PID_BASE_MENU_ITEMS(ELABEL, eindex); \
-          MENU_ITEM_EDIT(float3, MSG_PID_C ELABEL, &PID_PARAM(Kc, eindex), 1, 9990)
-      #else
-        #define _PID_MENU_ITEMS(ELABEL, eindex) _PID_BASE_MENU_ITEMS(ELABEL, eindex)
-      #endif
+		  #define _PID_BASE_MENU_ITEMS(ELABEL, eindex) \
+			raw_Ki = unscalePID_i(PID_PARAM(Ki, eindex)); \
+			raw_Kd = unscalePID_d(PID_PARAM(Kd, eindex)); \
+			MENU_ITEM_EDIT(float52, MSG_PID_P ELABEL, &PID_PARAM(Kp, eindex), 1, 9990); \
+			MENU_ITEM_EDIT_CALLBACK(float52, MSG_PID_I ELABEL, &raw_Ki, 0.01, 9990, copy_and_scalePID_i_E ## eindex); \
+			MENU_ITEM_EDIT_CALLBACK(float52, MSG_PID_D ELABEL, &raw_Kd, 1, 9990, copy_and_scalePID_d_E ## eindex)
 
-      #if ENABLED(PID_AUTOTUNE_MENU)
-        #define PID_MENU_ITEMS(ELABEL, eindex) \
-          _PID_MENU_ITEMS(ELABEL, eindex); \
-          MENU_MULTIPLIER_ITEM_EDIT_CALLBACK(int3, MSG_PID_AUTOTUNE ELABEL, &autotune_temp[eindex], 150, heater_maxtemp[eindex] - 15, lcd_autotune_callback_E ## eindex)
-      #else
-        #define PID_MENU_ITEMS(ELABEL, eindex) _PID_MENU_ITEMS(ELABEL, eindex)
-      #endif
+		  #if ENABLED(PID_EXTRUSION_SCALING)
+			#define _PID_MENU_ITEMS(ELABEL, eindex) \
+			  _PID_BASE_MENU_ITEMS(ELABEL, eindex); \
+			  MENU_ITEM_EDIT(float3, MSG_PID_C ELABEL, &PID_PARAM(Kc, eindex), 1, 9990)
+		  #else
+			#define _PID_MENU_ITEMS(ELABEL, eindex) _PID_BASE_MENU_ITEMS(ELABEL, eindex)
+		  #endif
 
-      #if ENABLED(PID_PARAMS_PER_HOTEND) && HOTENDS > 1
-        PID_MENU_ITEMS(" " MSG_E1, 0);
-        PID_MENU_ITEMS(" " MSG_E2, 1);
-        #if HOTENDS > 2
-          PID_MENU_ITEMS(" " MSG_E3, 2);
-          #if HOTENDS > 3
-            PID_MENU_ITEMS(" " MSG_E4, 3);
-            #if HOTENDS > 4
-              PID_MENU_ITEMS(" " MSG_E5, 4);
-            #endif // HOTENDS > 4
-          #endif // HOTENDS > 3
-        #endif // HOTENDS > 2
-      #else // !PID_PARAMS_PER_HOTEND || HOTENDS == 1
-        PID_MENU_ITEMS("", 0);
-      #endif // !PID_PARAMS_PER_HOTEND || HOTENDS == 1
+		  #if ENABLED(PID_AUTOTUNE_MENU)
+			#define PID_MENU_ITEMS(ELABEL, eindex) \
+			  _PID_MENU_ITEMS(ELABEL, eindex); \
+			  MENU_MULTIPLIER_ITEM_EDIT_CALLBACK(int3, MSG_PID_AUTOTUNE ELABEL, &autotune_temp[eindex], 150, heater_maxtemp[eindex] - 15, lcd_autotune_callback_E ## eindex)
+		  #else
+			#define PID_MENU_ITEMS(ELABEL, eindex) _PID_MENU_ITEMS(ELABEL, eindex)
+		  #endif
 
-    #endif // PIDTEMP
+		  #if ENABLED(PID_PARAMS_PER_HOTEND) && HOTENDS > 1
+			PID_MENU_ITEMS(" " MSG_E1, 0);
+			PID_MENU_ITEMS(" " MSG_E2, 1);
+			#if HOTENDS > 2
+			  PID_MENU_ITEMS(" " MSG_E3, 2);
+			  #if HOTENDS > 3
+				PID_MENU_ITEMS(" " MSG_E4, 3);
+				#if HOTENDS > 4
+				  PID_MENU_ITEMS(" " MSG_E5, 4);
+				#endif // HOTENDS > 4
+			  #endif // HOTENDS > 3
+			#endif // HOTENDS > 2
+		  #else // !PID_PARAMS_PER_HOTEND || HOTENDS == 1
+			PID_MENU_ITEMS("", 0);
+		  #endif // !PID_PARAMS_PER_HOTEND || HOTENDS == 1
 
-    //
-    // Preheat Material 1 conf
-    //
-    MENU_ITEM(submenu, MSG_PREHEAT_1_SETTINGS, lcd_control_temperature_preheat_material1_settings_menu);
+		#endif // PIDTEMP
 
-    //
-    // Preheat Material 2 conf
-    //
-    MENU_ITEM(submenu, MSG_PREHEAT_2_SETTINGS, lcd_control_temperature_preheat_material2_settings_menu);
+		//
+		// Preheat Material 1 conf
+		//
+		MENU_ITEM(submenu, MSG_PREHEAT_1_SETTINGS, lcd_control_temperature_preheat_material1_settings_menu);
+
+		//
+		// Preheat Material 2 conf
+		//
+		MENU_ITEM(submenu, MSG_PREHEAT_2_SETTINGS, lcd_control_temperature_preheat_material2_settings_menu);
+
+	#endif //#if !(IS_CNC_MILL)
+
     END_MENU();
   }
 
