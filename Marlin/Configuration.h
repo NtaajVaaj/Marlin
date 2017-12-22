@@ -528,8 +528,12 @@
  * Default Axis Steps Per Unit (steps/mm)
  * Override with M92
  *                                      X, Y, Z, E0 [, E1[, E2[, E3[, E4]]]]
+ *
+ * 5/16"-18 = 200 steps/turn * 18 turn/in * 1 in/25.4mm = 141.73236 steps/mm (Full step)
+ * T8-4mm = 200 steps/turn * 1 turn / 4mm = 50 steps/mm (Full step)  for 0.02mm accuracy
  */
-#define DEFAULT_AXIS_STEPS_PER_UNIT   {200, 200, 141.73236, 200}
+ #define DEFAULT_AXIS_STEPS_PER_UNIT   {200, 200, 50, 200}
+
 
 /**
  * Default Max Feed Rate (mm/s)
@@ -785,7 +789,7 @@
 #define Z_MIN_POS 0
 #define X_MAX_POS X_BED_SIZE
 #define Y_MAX_POS Y_BED_SIZE
-#define Z_MAX_POS 148
+#define Z_MAX_POS 100  // 148
 
 // If enabled, axes won't move below MIN_POS in response to movement commands.
 #define MIN_SOFTWARE_ENDSTOPS
