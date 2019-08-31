@@ -2445,13 +2445,6 @@ void kill_screen(const char* lcd_msg) {
     #endif
 
     //
-    // Z-Probe.  Calls G30 to perform a single z-probe
-    //
-    #if HAS_BED_PROBE
-        MENU_ITEM(gcode, MSG_PROBE_Z, PSTR("G30\nG92 Z19.05"));
-    #endif
-
-    //
     // Move Axis
     //
     #if ENABLED(DELTA)
@@ -2460,9 +2453,21 @@ void kill_screen(const char* lcd_msg) {
       MENU_ITEM(submenu, MSG_MOVE_AXIS, lcd_move_menu);
 
     //
+    // Assume the Origin(0,0) where ever the head is currently located
+    //
+    MENU_ITEM(gcode, MSG_SET_XY_ORIGIN, PSTR("G92 X0 Y0"));
+
+    //
+    // Z-Probe.  Calls G30 to perform a single z-probe
+    //
+    #if HAS_BED_PROBE
+        MENU_ITEM(gcode, MSG_PROBE_Z, PSTR("G30\nG92 Z19.05"));
+    #endif
+
+    //
     // Assume the Origin(0,0,0) where ever the head is currently located
     //
-    MENU_ITEM(gcode, MSG_SET_ORIGIN, PSTR("G92 X0 Y0 Z0"));
+    // MENU_ITEM(gcode, MSG_SET_ORIGIN, PSTR("G92 X0 Y0 Z0"));
 
 
     //

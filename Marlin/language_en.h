@@ -99,6 +99,9 @@
 #ifndef MSG_SET_ORIGIN
   #define MSG_SET_ORIGIN                      _UxGT("Set XYZ origin")
 #endif
+#ifndef MSG_SET_XY_ORIGIN
+  #define MSG_SET_XY_ORIGIN                      _UxGT("Set XY origin")
+#endif
 #ifndef MSG_PROBE_Z
   #define MSG_PROBE_Z                         _UxGT("Probe Z")
 #endif
